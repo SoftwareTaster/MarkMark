@@ -4,15 +4,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_opentxt"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_menu_txt"
             android:title="打开TXT" />
         <item
             android:id="@+id/nav_savejson"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_menu_json_save_2"
             android:title="输出JSON" />
         <item
             android:id="@+id/nav_openjson"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_menu_json_open"
             android:title="浏览JSON" />
         <item
             android:id="@+id/nav_manage"
