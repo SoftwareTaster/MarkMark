@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">MarkMark</string>
 
+    <string name="welcome">Hello!\n</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">设置</string>
+    <string name="action_show_all">显示全部文件</string>
+    <string name="action_default_folder">显示默认位置的文件</string>
 </resources>

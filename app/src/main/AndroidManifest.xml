@@ -13,6 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
+            android:launchMode="singleTask"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,6 +24,7 @@
         </activity>
         <activity
             android:name=".FileListActivity"
+            android:launchMode="singleTask"
             android:parentActivityName=".MainActivity">
         </activity>
     </application>
