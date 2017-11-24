@@ -25,7 +25,7 @@ public class FileListActivity extends AppCompatActivity {
     private static final String TAG = "FileListActivity";
     private String fileType = "";
     private boolean bShowAll = false;
-    private final String txtDefaultFolder = "/storage/emulated/0/Android";
+    private final String txtDefaultFolder = "/storage/emulated/0/标注文本";
     private final String jsonDefaultFolder = "/storage/emulated/0/Android";
     private ListView listView;
     private SimpleAdapter simpleAdapter;
@@ -103,18 +103,7 @@ public class FileListActivity extends AppCompatActivity {
         GenFileListAll(dir, paths, names);
     }
 
-
-    //对列表进行初始化
-    private void initList() {
-        paths.clear();
-        names.clear();
-
-        File root = Environment.getExternalStorageDirectory(); //获得外部存储的根目录
-        if (bShowAll) {
-            GenFileListAll(root, paths, names);
-        } else {
-            GenFileListDefault(paths, names);
-        }
+    private void changeUI() {
         ArrayList<Map<String, String>> maps = new ArrayList<Map<String,String>>();
         for (int i=0; i<paths.size(); i++) {
             Map<String, String> map = new HashMap<String, String>();
@@ -138,18 +127,20 @@ public class FileListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        pb = (ProgressBar) findViewById(R.id.list_progress_bar);
+        pb.setVisibility(ProgressBar.GONE);
     }
 
     //对列表进行初始化（带有进度条）
     private void initListWithPB() {
-        paths.clear();
-        names.clear();
         pb = (ProgressBar) findViewById(R.id.list_progress_bar);
         pb.setVisibility(ProgressBar.VISIBLE);
 
         new Thread() {
-            File root = Environment.getExternalStorageDirectory(); //获得外部存储的根目录
             public void run() {
+                paths.clear();
+                names.clear();
+                File root = Environment.getExternalStorageDirectory(); //获得外部存储的根目录
                 if (bShowAll) {
                     GenFileListAll(root, paths, names);
                 } else {
@@ -157,30 +148,7 @@ public class FileListActivity extends AppCompatActivity {
                 }
                 runOnUiThread(new Runnable() {
                     public void run() {
-                        ArrayList<Map<String, String>> maps = new ArrayList<Map<String,String>>();
-                        for (int i=0; i<paths.size(); i++) {
-                            Map<String, String> map = new HashMap<String, String>();
-                            map.put("first", names.get(i));
-                            map.put("second", paths.get(i));
-                            maps.add(map);
-                        }
-                        simpleAdapter = new SimpleAdapter(FileListActivity.this, maps, R.layout.file_list,
-                                new String[]{"first","second"}, new int[]{android.R.id.text1,android.R.id.text2});
-                        listView = (ListView) findViewById(R.id.file_list);
-                        listView.setAdapter(simpleAdapter);
-                        simpleAdapter.notifyDataSetChanged();
-                        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
-                                String absolutePath = paths.get(position) + "/" + names.get(position);
-                                Intent intent = new Intent(FileListActivity.this,MainActivity.class);
-                                intent.putExtra("file_path",absolutePath);
-                                intent.putExtra("file_type",fileType);
-                                Log.d(TAG, absolutePath+" of "+fileType);
-                                startActivity(intent);
-                            }
-                        });
-                        pb.setVisibility(ProgressBar.GONE);
+                        changeUI();
                     }
                 });
             }

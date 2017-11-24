@@ -16,14 +16,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
-    private String fileType;
-    private String filePath;
-    private TextView content;
+    private String fileType = "";
+    private String filePath = "";
+    private TextView textView;
+    private String text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,16 +60,49 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Intent intent = getIntent();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
         if (intent!=null) {
+            Log.d(TAG, "INTENT IS NOT NULL");
             fileType = intent.getStringExtra("file_type");
             filePath = intent.getStringExtra("file_path");
-            Log.d(TAG, filePath+"  of  "+fileType);
-            content = (TextView)findViewById(R.id.content);
-            content.setText(filePath);
         }
     }
 
+    @Override
+    public void onStart(){
+        super.onStart();
+        if (filePath!=null && !filePath.equals("")) {
+            Log.d(TAG, filePath + "  of  " + fileType);
+            BufferedReader br = null;
+            try {
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath),"UTF-8"));
+                StringBuffer sb = new StringBuffer();
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+                text = sb.toString();
+            } catch(Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (br!=null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            textView = (TextView) findViewById(R.id.content);
+            textView.setText(text);
+        }
+    }
     @Override
     public void onBackPressed() { //按下手机的后退按钮
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
