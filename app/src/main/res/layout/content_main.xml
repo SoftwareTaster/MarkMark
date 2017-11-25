@@ -23,6 +23,7 @@
         android:paddingRight="10dp"
         android:textSize="20sp"
         android:lineSpacingMultiplier="1.3"
+        android:textIsSelectable="true"
         android:text="@string/welcome" />
 
     </ScrollView>

@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -126,13 +127,17 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Toast.makeText(MainActivity.this,"Setting",Toast.LENGTH_SHORT).show();
             return true;
+        } else if (id == R.id.font_big) {
+            textView = (TextView) findViewById(R.id.content);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX,textView.getTextSize()+3);//getTextSize获取的值是px的值
+        } else if (id == R.id.font_small) {
+            textView = (TextView) findViewById(R.id.content);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX,textView.getTextSize()-3);
         }
-
         return super.onOptionsItemSelected(item);
     }
 
