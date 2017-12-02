@@ -8,7 +8,7 @@
     tools:context="com.example.zju.markmark.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <TextView
+    <com.example.zju.markmark.MarkedTextView
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

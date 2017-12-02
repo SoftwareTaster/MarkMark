@@ -270,6 +270,7 @@ public class BangActivity extends AppCompatActivity {
             FileOutputStream out = new FileOutputStream(jsonDefaultFolder + jsonfilename);
             writer = new BufferedWriter(new OutputStreamWriter(out));
             writer.write(json);
+            Log.i(TAG, json);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -293,12 +294,14 @@ public class BangActivity extends AppCompatActivity {
         for (MarkEntity mE : entityMentions) {
             if (start >= mE.getStart() && end <= mE.getEnd()) {
                 entityMentions.remove(mE);
+                break;
             } // Legal cancel choosing
         }
         ArrayList<MarkRelation> relationMentions = mMark.getRelationMentions();
         for (MarkRelation mR : relationMentions) {
             if ((start >= mR.getStart1() && end <= mR.getEnd1()) || (start >= mR.getStart2() && end <= mR.getEnd2())) {
                 relationMentions.remove(mR);
+                break;
             } // No matter which entity is chosen
         }
         updateJson(mMark);

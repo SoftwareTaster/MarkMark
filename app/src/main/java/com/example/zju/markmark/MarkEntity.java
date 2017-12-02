@@ -33,4 +33,12 @@ public class MarkEntity implements Serializable{
         return label;
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public int getTextLength() {
+        return text.length();
+    }
+
 }

@@ -10,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
@@ -20,9 +21,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
     private String fileType = "";
     private String filePath = "";
-    private TextView textView;
+    private MarkedTextView textView;
     private String text;
 
     private boolean editMode = false;
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
 
-                textView = (TextView) findViewById(R.id.content);
+                textView = (MarkedTextView)findViewById(R.id.content);
                 text = textView.getText().toString();
                 editMode = !editMode;
                 if (editMode) {
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        Log.i(TAG, "onCreate()");
     }
 
     @Override
@@ -130,10 +134,57 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-
-            textView = (TextView) findViewById(R.id.content);
+            textView = (MarkedTextView) findViewById(R.id.content);
             textView.setText(text);
+
             Log.i(TAG, "onStart()");
+            try {
+                File dir = new File("/storage/emulated/0/JS");
+                File [] files = dir.listFiles();
+                textView.cl();
+                for (int i = 0; i < files.length; i++) {
+                    String fileName = files[i].getAbsolutePath();
+                    fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+                    if (filePath.substring(filePath.lastIndexOf("/") + 1).replace(".txt", ".json").equals(fileName.substring(fileName.indexOf(":") + 2))) {
+                        Log.i(TAG, filePath.substring(filePath.lastIndexOf("/") + 1).replace(".txt", ".json") + " ------ " + fileName.substring(fileName.indexOf(":") + 2));
+                        br = new BufferedReader(new InputStreamReader(new FileInputStream(files[i].getAbsolutePath()),"UTF-8"));
+                        /*Log.i(TAG, files[i].getAbsolutePath());*/
+                        StringBuffer sb = new StringBuffer();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line);
+                        }
+                        String jsonstring = sb.toString();
+                        /*Log.i(TAG, jsonstring);*/
+                        GsonBuilder builder=new GsonBuilder();
+                        Gson gson=builder.create();
+                        Mark mmark = gson.fromJson(jsonstring, Mark.class);
+                        for (MarkEntity mE : mmark.getEntityMentions()) {
+                            int pos = text.indexOf(mE.getText(), 0);
+                            /*Log.i(TAG, String.valueOf(pos));*/
+                            while (pos != -1) {
+                                textView.setStart(pos);
+                                textView.setEnd(pos + mE.getTextLength() - 1);
+                                textView.setLabel(mE.getLabel());
+                                pos = text.indexOf(mE.getText(), pos + 1);
+                            }
+                        }
+                    }
+                }
+                textView.invalidate();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+            finally {
+                if (br!=null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
         editMode = false;
     }
@@ -162,13 +213,32 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Toast.makeText(MainActivity.this,"Setting",Toast.LENGTH_SHORT).show();
+            textView = (MarkedTextView) findViewById(R.id.content);
+            String str = "<h1>操作说明</h1>" +
+                    "<h2>1. 如何打开文本文件？</h2>" +
+                    "<p>你可以将需要标注的文本文件放在MarkMark下的txt文件夹里，这样点开侧边栏的“打开TXT”就能直接在列表里看到你的文本文件了。</p>" +
+                    "<p>当然，方便起见，你也可以直接将文本文件放在存储目录下的任意文件夹下，我们右上角菜单的“显示全部文件”可以让你很快捷地找到你的文件。</p>" +
+                    "<h2>2. 如何标注文本？</h2>" +
+                    "<p>在打开文本文件后，点击右下角地浮动按钮便可以将文本分成一个一个的句子。</p>" +
+                    "<p>你可以选择打开任意句子进入标注模式。</p>" +
+                    "<p>在标注模式中，与其他文本编辑文件不同，你在选择文本时不需要长按触发，只需要轻触滑动或者点击字符便可选择想要的文本，并可以通过再次轻触滑动或者点击字符进行加选减选。</p>" +
+                    "<p>每次选择后都有对话卡片弹出，对话卡片上共有三种实体（国家、城市、人物）和两种关系（城市及其所在国家、人物及其所属国家）可以选择，不同的实体以不同的颜色填充加以区分，而不同的关系则以不同颜色的线框以示区别，并且，关系的两个实体之间还有细线相连，使其更加一目了然。</p>" +
+                    "<p>你也可以通过选择之前标注内容中的任意部分并点击对话卡片上的“删除”将其取消标注。</p>" +
+                    "<p>标注后结果将以句子为单位自动保存到MarkMark下的json文件夹里。</p>" +
+                    "<h2>3. 如何查看结果？</h2>" +
+                    "<p>重新进入到阅读文本界面就可以看到标注结果了。</p>" +
+                    "<p>你也可以打开侧边栏的“浏览JSON”查看json源文件。</p>";
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                textView.setText(Html.fromHtml(str, Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                textView.setText(Html.fromHtml(str));
+            }
             return true;
         } else if (id == R.id.font_big) {
-            textView = (TextView) findViewById(R.id.content);
+            textView = (MarkedTextView) findViewById(R.id.content);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_PX,textView.getTextSize()+3);//getTextSize获取的值是px的值
         } else if (id == R.id.font_small) {
-            textView = (TextView) findViewById(R.id.content);
+            textView = (MarkedTextView) findViewById(R.id.content);
             textView.setTextSize(TypedValue.COMPLEX_UNIT_PX,textView.getTextSize()-3);
         }
         return super.onOptionsItemSelected(item);
@@ -214,7 +284,7 @@ public class MainActivity extends AppCompatActivity
         }
     }*/
 
-    public void getEachSentence(TextView textView) {
+    public void getEachSentence(MarkedTextView textView) {
         Spannable spans = (Spannable)textView.getText();
         Integer[] indices = getIndices(textView.getText().toString().trim(), '。');
         int start = 0;
@@ -232,7 +302,7 @@ public class MainActivity extends AppCompatActivity
         return new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                TextView tv = (TextView) widget;
+                TextView tv = (MarkedTextView) widget;
                 String s = tv.getText().subSequence(tv.getSelectionStart(), tv.getSelectionEnd()).toString();
                 if (text != null) {
                     String sentenceString = s;

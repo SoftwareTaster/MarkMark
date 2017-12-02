@@ -9,4 +9,6 @@
     <string name="action_settings">设置</string>
     <string name="action_show_all">显示全部文件</string>
     <string name="action_default_folder">显示默认位置的文件</string>
+
+    <string name="About"></string>
 </resources>
